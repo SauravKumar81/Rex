@@ -40,13 +40,11 @@ export class RexClient {
     });
   }
 
-  // Ask the daemon to capture one utterance from the mic and run it.
   async listenOnce() {
     const res = await fetch(`${this.httpBase}/listen`, { method: "POST" });
     return res.json();
   }
 
-  // Run a command directly (text already transcribed).
   async command(text) {
     const res = await fetch(`${this.httpBase}/command`, {
       method: "POST",

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Rex Python daemon: wake word -> offline STT -> Hermes agent.
 
 Modes (standalone):
@@ -25,7 +26,6 @@ def load_config():
 
 
 def handle_audio(path, config):
-    """Transcribe, gate on wake word, dispatch to Hermes. Returns reply text."""
     text = stt.transcribe(path, size=config["stt_model"], language=config["language"])
     print(f"[stt] {text!r}")
     kw, command = wake.detect(text, config["wake_words"])
@@ -56,7 +56,7 @@ def selftest(wav_path, config):
 
 
 def live(config):
-    import mic  # lazy: pulls in sounddevice/soundfile only when a mic is used
+    import mic
     print("[daemon] starting always-on listener. Ctrl+C to stop.")
     while True:
         try:

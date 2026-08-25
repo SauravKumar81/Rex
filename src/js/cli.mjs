@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Rex control-layer entry point.
 // Starts the Python audio bridge, connects over WebSocket, prints live events.
 import { startPythonDaemon } from "./daemon.mjs";
@@ -17,7 +16,6 @@ const client = new RexClient({
 });
 
 async function main() {
-  // Give the bridge a moment to boot.
   await new Promise((r) => setTimeout(r, 1500));
   try {
     await client.connect();
@@ -43,7 +41,6 @@ async function main() {
   console.log("[rex] or trigger a command programmatically:");
   console.log('  client.command("hey hermes, what is 2 plus 2")');
 
-  // Demo: if a command was passed as argv, run it once.
   const arg = process.argv.slice(2).join(" ").trim();
   if (arg) {
     const res = await client.command(arg);

@@ -6,8 +6,7 @@ import { join } from "node:path";
 
 export function startPythonDaemon() {
   const config = loadConfig();
-  const hermesExe = config.hermes_exe; // ...\hermes-agent\venv\Scripts\hermes.exe
-  // Derive the venv python from the hermes exe path.
+  const hermesExe = config.hermes_exe;
   const venvPy = hermesExe.replace(/hermes\.exe$/i, "python.exe");
   const bridge = join(ROOT_DIR, "src", "py", "bridge.py");
 

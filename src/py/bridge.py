@@ -16,7 +16,7 @@ import os
 import sys
 import threading
 
-import websockets  # pip install websockets (or use Hermes venv)
+import websockets
 import stt
 import wake
 import agent
@@ -24,17 +24,16 @@ import agent
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-import daemon as rex_daemon  # reuse load_config/handle_audio
+import daemon as rex_daemon
 
 
 def load_config():
     return rex_daemon.load_config()
 
 
-# Broadcast channel for websocket clients.
 CLIENTS = set()
 CONFIG = None
-LOOP = None  # main event loop, set in main()
+LOOP = None
 
 
 def set_loop(loop):
@@ -56,7 +55,6 @@ async def broadcast(event):
 
 
 def _pipeline_from_text(text, config):
-    """Run stt->wake->agent on already-transcribed text. Returns (status, reply)."""
     print(f"[stt] {text!r}")
     kw, command = wake.detect(text, config["wake_words"])
     if kw is None:
@@ -87,12 +85,9 @@ async def run_mic_once(config):
 
 
 async def handle_http(scope, receive, send):
-    """Minimal ASGI-ish handler shim (works with websockets' web server)."""
     pass
 
 
-# --- HTTP endpoints via a tiny aiohttp-free server using websockets.serve ----
-# We implement HTTP with the standard library to avoid extra deps.
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 
@@ -122,8 +117,6 @@ class Handler(BaseHTTPRequestHandler):
         try:
             _dispatch(data, self)
         except (ConnectionResetError, BrokenPipeError, OSError):
-            # Client disconnected before we finished (common with streaming
-            # fetch clients). The WS broadcast already carried the result.
             pass
 
     def log_message(self, *a):
@@ -131,7 +124,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def _broadcast_safe(event):
-    """Schedule a WS broadcast on the main loop from any thread."""
     if LOOP is None:
         print("[bridge] broadcast skipped: LOOP not set", flush=True)
         return
@@ -148,13 +140,9 @@ def _dispatch(data, handler):
     if "text" in data and data["text"]:
         status, reply = _pipeline_from_text(data["text"], config)
     else:
-        # mic capture must run in the loop thread; for HTTP thread we can't easily
-        # run the blocking mic here — schedule via the loop.
         reply = None
         status = "error"
     result = {"status": status, "reply": reply}
-    # Speak the reply aloud on a background thread (sounddevice blocks, so
-    # don't do it on the main event loop). Only speak when there is a clean reply.
     if reply:
         def _speak():
             try:
@@ -174,13 +162,11 @@ def main():
     ws_port = b.get("ws_port", 8765)
     http_port = b.get("http_port", 8766)
 
-    # Start HTTP server in a background thread.
     httpd = HTTPServer(("127.0.0.1", http_port), Handler)
     t = threading.Thread(target=httpd.serve_forever, daemon=True)
     t.start()
     print(f"[bridge] HTTP  on 127.0.0.1:{http_port}")
 
-    # Start WebSocket server inside the running event loop.
     print(f"[bridge] WS    on 127.0.0.1:{ws_port}")
 
     async def _run():
