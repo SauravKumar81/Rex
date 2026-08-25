@@ -1,0 +1,19 @@
+{
+  "name": "rex",
+  "version": "0.1.0",
+  "description": "Voice wake-word layer that gives hands-free access to the full Hermes agent.",
+  "type": "module",
+  "bin": {
+    "rex": "src/js/cli.mjs"
+  },
+  "scripts": {
+    "start": "node src/js/cli.mjs",
+    "daemon:start": "node src/js/daemon.mjs",
+    "py:selftest": "python src/py/daemon.py --selftest samples/sample.wav",
+    "py:mic": "python src/py/daemon.py --mic"
+  },
+  "engines": {
+    "node": ">=21"
+  },
+  "license": "MIT"
+}

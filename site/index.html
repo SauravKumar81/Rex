@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rex — Voice Wake-Word Agent for Hermes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--black:#050505;--panel:#0e0e0e;--line:rgba(245,245,240,.12);--line2:rgba(245,245,240,.22);--white:#f5f5f0;--muted:#9a9a94;--faint:#6b6b66;--acc:#3ad07a;--serif:'Cormorant Garamond',serif;--sans:'Inter',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--black);color:var(--white);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:64px 40px 120px}
+  header{border-bottom:1px solid var(--line);padding-bottom:40px;margin-bottom:56px}
+  .kicker{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--faint);margin-bottom:22px}
+  h1{font-family:var(--serif);font-size:clamp(48px,8vw,104px);font-weight:600;line-height:1.0;letter-spacing:-.01em}
+  h1 em{font-style:italic;font-weight:400}
+  .who{display:flex;align-items:center;gap:16px;margin-top:26px;color:var(--muted);font-size:14px}
+  .who .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+  .lead{font-size:19px;color:var(--muted);max-width:720px;margin-top:30px;line-height:1.55}
+  .sec{margin-top:64px;border-top:1px solid var(--line);padding-top:34px}
+  .sec-h{display:flex;align-items:baseline;gap:18px;margin-bottom:26px}
+  .num{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--faint)}
+  .sec-t{font-family:var(--serif);font-size:clamp(26px,3.4vw,38px);font-weight:500}
+  .sec-b{color:var(--muted);font-size:15px;max-width:760px}
+  .sec-b code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--panel);border:1px solid var(--line);padding:2px 7px;border-radius:5px;color:var(--white);font-size:13px}
+  .pipeline{display:flex;flex-wrap:wrap;gap:0;margin-top:10px}
+  .pipeline .step{font-size:13px;color:var(--white);padding:12px 18px;border:1px solid var(--line);margin:-0.5px}
+  .pipeline .arrow{color:var(--faint);align-self:center;padding:0 6px;font-size:13px}
+  .files{display:grid;grid-template-columns:repeat(2,1fr);gap:0;margin-top:8px}
+  .files .f{display:flex;justify-content:space-between;padding:16px 4px;border-bottom:1px solid var(--line);font-size:14px}
+  .files .f span:first-child{color:var(--white);font-family:ui-monospace,monospace;font-size:13px}
+  .files .f span:last-child{color:var(--faint);font-size:12px}
+  .cmd{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--white);overflow-x:auto}
+  .badge{display:inline-block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--line);border-radius:99px;color:var(--acc);border-color:rgba(58,208,122,.4);margin-top:14px}
+  footer{margin-top:80px;text-align:center;color:var(--faint);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+  @media(max-width:780px){.files{grid-template-columns:1fr}.lead{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">Voice-Hermes · Wake-Word Agent</p>
+    <h1>Rex</h1>
+    <div class="who"><span class="dot"></span>Always-listening voice layer for your Hermes agent — say the keyword, Hermes runs it with full system access. Offline. Private. No cloud.</div>
+    <p class="lead">A local daemon that catches your wake word, transcribes your instruction with an offline model, and hands it to the full Hermes agent — files, terminal, browser, computer-use — then speaks the answer back. A JS control layer drives it over a local bridge.</p>
+  </header>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">01</div><div class="sec-t">Status</div></div>
+    <p class="sec-b">Verified working end-to-end. A spoken <em>"Hey Hermes, what is 2 plus 2?"</em> flowed through offline STT → wake-word gate → the full Hermes agent → <em>"2 plus 2 equals 4."</em> — spoken back by TTS. The JS control layer also round-tripped: it connected to the Python bridge, sent a command, and received the clean Hermes reply plus live WebSocket events.</p>
+    <span class="badge">Voice loop complete</span>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">02</div><div class="sec-t">How it works</div></div>
+    <div class="pipeline">
+      <div class="step">mic → VAD</div><div class="arrow">→</div>
+      <div class="step">offline STT</div><div class="arrow">→</div>
+      <div class="step">wake gate</div><div class="arrow">→</div>
+      <div class="step">hermes chat -q</div><div class="arrow">→</div>
+      <div class="step">TTS reply</div>
+    </div>
+    <p class="sec-b" style="margin-top:18px">STT uses the <code>faster-whisper</code> model already bundled inside Hermes's own Python venv — no cloud, no extra model download. The wake gate matches your keyword and splits off the command that follows. The reply is spoken back with <code>edge-tts</code> over <code>sounddevice</code>.</p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">03</div><div class="sec-t">Components</div></div>
+    <div class="files">
+      <div class="f"><span>daemon.py</span><span>orchestrator</span></div>
+      <div class="f"><span>stt.py</span><span>offline whisper</span></div>
+      <div class="f"><span>wake.py</span><span>keyword gate</span></div>
+      <div class="f"><span>agent.py</span><span>hermes dispatch + TTS</span></div>
+      <div class="f"><span>mic.py</span><span>mic + VAD</span></div>
+      <div class="f"><span>bridge.py</span><span>HTTP + WS bridge</span></div>
+      <div class="f"><span>cli.mjs</span><span>JS control layer</span></div>
+      <div class="f"><span>client.mjs</span><span>WS + HTTP client</span></div>
+      <div class="f"><span>daemon.mjs</span><span>supervises bridge</span></div>
+      <div class="f"><span>config.json</span><span>wake words / safety</span></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">04</div><div class="sec-t">Run it</div></div>
+    <p class="sec-b">Start the JS control layer (it owns the Python bridge):</p>
+    <div class="cmd">cd C:\Users\Saura\rex && node src\js\cli.mjs --text "hey hermes, what is 2 plus 2"</div>
+    <p class="sec-b" style="margin-top:14px">Or start the Python audio daemon directly (needs a real mic):</p>
+    <div class="cmd">C:\Users\Saura\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe C:\Users\Saura\rex\src\py\daemon.py --mic</div>
+    <p class="sec-b" style="margin-top:14px">Self-test a recorded clip without a mic: <code>python daemon.py --selftest sample.wav</code></p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">05</div><div class="sec-t">Safety</div></div>
+    <p class="sec-b">Always-on mic + agent-with-terminal is powerful. Hermes runs with <code>approvals.mode: smart</code> so destructive tool calls still prompt you, and a dangerous-command guard blocks obviously destructive spoken instructions pending confirmation. Wake words, guard toggle, and TTS voice live in <code>config.json</code>.</p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div class="num">06</div><div class="sec-t">Links</div></div>
+    <div class="files">
+      <div class="f"><span><a href="https://gentle-moment-qf8v.here.now/" style="color:var(--white);text-decoration:none">here.now · dashboard</a></span><span>live dashboard</span></div>
+      <div class="f"><span><a href="https://app.notion.com/p/jarves-3c7fa84d3a9a81ddb3afd78d2178d6ec" style="color:var(--white);text-decoration:none">Notion · rex</a></span><span>project page</span></div>
+      <div class="f"><span><a href="https://github.com/SauravKumar81/Rex" style="color:var(--white);text-decoration:none">GitHub · SauravKumar81/Rex</a></span><span>source</span></div>
+    </div>
+  </section>
+
+  <footer>Generated by Hermes · rex · updated 2026-08-25</footer>
+</div>
+</body>
+</html>
