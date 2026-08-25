@@ -1,0 +1,17 @@
+{
+  "wake_words": ["hey hermes", "hermes", "ok hermes"],
+  "stt_model": "base",
+  "wake_model": "tiny",
+  "language": "en",
+  "silence_seconds": 1.2,
+  "speech_threshold": 0.012,
+  "hermes_exe": "C:\\Users\\Saura\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts\\hermes.exe",
+  "agent_timeout": 300,
+  "speak_reply": true,
+  "confirm_dangerous": true,
+  "bridge": {
+    "host": "127.0.0.1",
+    "ws_port": 8765,
+    "http_port": 8766
+  }
+}
